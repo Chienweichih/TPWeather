@@ -12,6 +12,5 @@ print "pull"
 
 
 print "Thanks for my dear. :)"
-
 while True:
     print "my love"
