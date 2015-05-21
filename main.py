@@ -9,3 +9,5 @@ print "Hello! You can GIT now!!"
 
 print "add -> commit -> push"
 print "pull"
+
+print "Thanks for my dear. :)"
