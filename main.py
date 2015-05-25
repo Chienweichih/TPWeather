@@ -4,6 +4,7 @@ import time
 import datetime
 import json
 import codecs
+import shutil
 
 '''''''''''''''''''''
 * School Id
@@ -15,26 +16,22 @@ schoolID = {u'至善國中':'413504',u'國語實小':'353604',u'福林國小':'4
             u'三玉國小':'413619',u'湖田國小':'423605',u'中正國小':'343602',
             u'龍安國小':'333601'}
 
-weatherOrder = [u"開始時間",u"結束時間",u"學校名稱",u"Id",u"降雨量",u"降雨速率",
+weatherOrder = (u"開始時間",u"結束時間",u"學校名稱",u"Id",u"降雨量",u"降雨速率",
                 u"濕度",u"最高濕度",u"氣溫",u"最高溫",u"最低溫",u"酷熱指數",
                 u"最高酷熱指數",u"紫外線",u"最高紫外線",u"氣壓",u"最高氣壓",u"最低氣壓",
                 u"輻射",u"最高輻射",u"最低濕度",u"風速",u"最大風速",u"風向",
-                u'StartStamp',u'EndStamp',u'CreateOn',u'Disable']
+                u'StartStamp',u'EndStamp',u'CreateOn',u'Disable')
 
-def getTimeStamp(startTimeStr, endTimeStr, timeFilter):
-    startTime = datetime.datetime.strptime(startTimeStr,timeFilter)
-    endTime = datetime.datetime.strptime(endTimeStr,timeFilter)
-    
-    startTimeStamp = time.mktime(startTime.timetuple()) * 1000
-    endTimeStamp = time.mktime(endTime.timetuple()) * 1000
-    
-    return (startTimeStamp, endTimeStamp)
+def getTimeStamp(timeStr, timeFilter):
+    formatTime = datetime.datetime.strptime(timeStr,timeFilter)
+    timeStamp = time.mktime(formatTime.timetuple()) * 1000
+    return timeStamp
 
-def getRequests(schoolID, startTimeStamp, endTimeStamp):
+def getRequests(schoolID, dayStart, dayEnd):
     payload = {'id'     : schoolID,
                'by'     : 'minute',
-               'start'  : str(startTimeStamp),
-               'end'    : str(endTimeStamp)}
+               'start'  : str(dayStart),
+               'end'    : str(dayEnd)}
     res = requests.get('http://weather.tp.edu.tw/Ajax/jsonp/table.ashx', params=payload)
     return res
 
@@ -56,17 +53,25 @@ def writeToFile(fileName, wholeDayData):
             output.write("=====================================================\n")
 
 def main():
-
-    startTimeStr = '2015-05-20'
-    endTimeStr = '2015-05-21'
-    timeFilter = '%Y-%m-%d'
-
-    startTimeStamp, endTimeStamp = getTimeStamp(startTimeStr, endTimeStr, timeFilter)
+    if shutil.os.path.exists("output"):
+        shutil.rmtree("output")
+    shutil.os.mkdir("output")
     
-    res = getRequests(schoolID[u'至善國中'], startTimeStamp, endTimeStamp)
-    data = json.loads(res.text) #JSON Operate
-   
-    writeToFile("output.txt", data['result'])
+    fromWhen = '2015_05_13'
+    toWhen = '2015_05_26'
+    timeFilter = '%Y_%m_%d'
+    endTimeStamp = getTimeStamp(toWhen, timeFilter)
+    dayStart = getTimeStamp(fromWhen, timeFilter)
+    while dayStart < endTimeStamp:
+        dayEnd = dayStart + 86400000.0
+        startTimeStr = datetime.datetime.fromtimestamp(dayStart/1000).strftime(timeFilter)
+        shutil.os.mkdir("output/" + startTimeStr)
+        for schoolName in schoolID:
+            res = getRequests(schoolID[schoolName], dayStart, dayEnd)
+            data = json.loads(res.text) #JSON Operate
+            fileName = "output/" + startTimeStr + "/" + schoolName + "_" + startTimeStr + ".txt"
+            writeToFile(fileName, data['result'])
+        dayStart = dayEnd
 
 if __name__ == "__main__":
     main()
