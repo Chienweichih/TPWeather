@@ -57,7 +57,7 @@ def main():
         shutil.rmtree("output")
     shutil.os.mkdir("output")
     
-    fromWhen = '2015_05_13'
+    fromWhen = '2015_05_25'
     toWhen = '2015_05_26'
     timeFilter = '%Y_%m_%d'
     endTimeStamp = getTimeStamp(toWhen, timeFilter)
