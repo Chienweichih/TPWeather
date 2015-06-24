@@ -50,13 +50,19 @@ def normalizedMatrix(matrix):
     
 def printSummary(POIName,data,index):
     import statsmodels.formula.api as sm
+    import numpy as np
+    from numpy.linalg import inv
     import pandas as pd
     
     facebook_M = normalizedMatrix(data[0][index])
     rain_M = normalizedMatrix(data[1][index])
     heat_M = normalizedMatrix(data[2][index])
     date_M = normalizedMatrix(date)
-
+    '''
+    test = np.array([[1., 2.], [3., 4.]])
+    test = np.arange(1,5).reshape((2, 2))
+    invTest = inv(test)
+    '''
     df = pd.DataFrame({'checkIn':facebook_M.tolist()[0],
                        'date':date_M.tolist()[0],
                        'rain':rain_M.tolist()[0],
