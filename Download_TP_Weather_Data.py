@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-import requests
-import time
 import datetime
-import json
-import codecs
-import shutil
 
 '''''''''''''''''''''
 * School Id
@@ -23,11 +18,13 @@ weatherOrder = (u"開始時間",u"結束時間",u"學校名稱",u"Id",u"降雨�
                 u'StartStamp',u'EndStamp',u'CreateOn',u'Disable')
 
 def getTimeStamp(timeStr, timeFilter):
+    import time
     formatTime = datetime.datetime.strptime(timeStr,timeFilter)
     timeStamp = time.mktime(formatTime.timetuple()) * 1000
     return timeStamp
 
 def getRequests(schoolID, dayStart, dayEnd):
+    import requests
     payload = {'id'     : schoolID,
                'by'     : 'minute',
                'start'  : str(dayStart),
@@ -42,6 +39,7 @@ def checkBeforeWrite(outputFile, string):
         outputFile.write(str(string))
         
 def writeToFile(fileName, wholeDayData):
+    import codecs
     with codecs.open(fileName, "w", "utf-8") as output:
         for every5minsData in wholeDayData:
             sortedList = sorted(every5minsData.items(), key=lambda x:weatherOrder.index(x[0]))
@@ -53,12 +51,14 @@ def writeToFile(fileName, wholeDayData):
             output.write("=====================================================\n")
 
 def main():
+    import json
+    import shutil
     if shutil.os.path.exists("output"):
         shutil.rmtree("output")
     shutil.os.mkdir("output")
     
-    fromWhen = '2015_05_25'
-    toWhen = '2015_05_26'
+    fromWhen = '2015_06_15'
+    toWhen = '2015_06_16'
     timeFilter = '%Y_%m_%d'
     endTimeStamp = getTimeStamp(toWhen, timeFilter)
     dayStart = getTimeStamp(fromWhen, timeFilter)
