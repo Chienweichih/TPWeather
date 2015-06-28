@@ -15,12 +15,83 @@ POI = (u'順益台灣原住民博物館',u'National Palace Museum',u'Chunghwa Po
 ###### 31  1  2  3  4  5  6
 ######  7  8  9 10 11 12 13
 ###### 14 15
-date = [2.0,2.0,
-        2.0,1.0,1.0,1.0,1.0,2.0,2.0,
+date = [# all same
+        [1.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,1.0],
+        # weekday,weekend
+        [1.0,2.0,
+        2.0,1.0,1.0,1.0,1.0,1.0,2.0,
         2.0,1.0,1.0,1.0,1.0,2.0,
-        2.0,1.0,1.0,1.0,1.0,2.0,2.0,
-        2.0,1.0,1.0,1.0,1.0,2.0,2.0,
-        2.0,1.0]
+        2.0,1.0,1.0,1.0,1.0,1.0,2.0,
+        2.0,1.0,1.0,1.0,1.0,1.0,2.0,
+        2.0,1.0],
+        # monday
+        [1.0,1.0,
+        1.0,2.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,2.0,1.0,1.0,1.0,1.0,
+        1.0,2.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,2.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,2.0],
+        # tuesday
+        [1.0,1.0,
+        1.0,1.0,2.0,1.0,1.0,1.0,1.0,
+        1.0,1.0,2.0,1.0,1.0,1.0,
+        1.0,1.0,2.0,1.0,1.0,1.0,1.0,
+        1.0,1.0,2.0,1.0,1.0,1.0,1.0,
+        1.0,1.0],
+        # wednesday
+        [1.0,1.0,
+        1.0,1.0,1.0,2.0,1.0,1.0,1.0,
+        1.0,1.0,1.0,2.0,1.0,1.0,
+        1.0,1.0,1.0,2.0,1.0,1.0,1.0,
+        1.0,1.0,1.0,2.0,1.0,1.0,1.0,
+        1.0,1.0],
+        # thursday
+        [1.0,1.0,
+        1.0,1.0,1.0,1.0,2.0,1.0,1.0,
+        1.0,1.0,1.0,1.0,2.0,1.0,
+        1.0,1.0,1.0,1.0,2.0,1.0,1.0,
+        1.0,1.0,1.0,1.0,2.0,1.0,1.0,
+        1.0,1.0],
+        # friday
+        [2.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,2.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,2.0,1.0,
+        1.0,1.0,1.0,1.0,1.0,2.0,1.0,
+        1.0,1.0],
+        # saturday
+        [1.0,2.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,2.0,
+        1.0,1.0,1.0,1.0,1.0,2.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,2.0,
+        1.0,1.0,1.0,1.0,1.0,1.0,2.0,
+        1.0,1.0],
+        # sunday
+        [1.0,1.0,
+        2.0,1.0,1.0,1.0,1.0,1.0,1.0,
+        2.0,1.0,1.0,1.0,1.0,1.0,
+        2.0,1.0,1.0,1.0,1.0,1.0,1.0,
+        2.0,1.0,1.0,1.0,1.0,1.0,1.0,
+        2.0,1.0]]
+date_name = ['all_same','weekday_weekend',
+             'monday','tuesday','wednesday','thursday','friday','saturday','sunday']
+
+def main():
+    fileNames = ["Facebook_0616.csv","Rain_0616.csv","Heat_0616.csv"]
+    float_data = getSortedFloatList(fileNames)
+    
+    ADDMUL = ["ADD","MUL"]
+    for formulaIndex in range(2):
+        for i,date_date in enumerate(date):
+            results = []
+            for POIIndex in range(len(POI)):
+                results.append(OLSResults(float_data,POIIndex,date_date,formulaIndex))
+            printResults(results,"OLS/" + ADDMUL[formulaIndex] + "/OLS_Regression_" + date_name[i] + ".txt")
 
 def getSortedFloatList(fileNames):
     import csv
@@ -48,41 +119,51 @@ def normalizedMatrix(matrix):
     normed_matrix = normalize(matrix, axis=1, norm='l1')
     return normed_matrix
     
-def printSummary(POIName,data,index):
+def OLSResults(data,index,date_data,formulaIndex):
     import statsmodels.formula.api as sm
-    import numpy as np
     from numpy.linalg import inv
     import pandas as pd
+    import numpy as np
+    
+    myFormula = ["checkIn ~ rain + heat + date","CdD ~ rain + heat"]
     
     facebook_M = normalizedMatrix(data[0][index])
     rain_M = normalizedMatrix(data[1][index])
     heat_M = normalizedMatrix(data[2][index])
-    date_M = normalizedMatrix(date)
+    date_M = normalizedMatrix(date_data)
+    cdd_M = np.dot(facebook_M,inv(np.diag(date_M[0])))
+    
+    print cdd_M
+    
     '''
     test = np.array([[1., 2.], [3., 4.]])
     test = np.arange(1,5).reshape((2, 2))
-    invTest = inv(test)
+    invDate = inv(date_M)
     '''
-    df = pd.DataFrame({'checkIn':facebook_M.tolist()[0],
-                       'date':date_M.tolist()[0],
-                       'rain':rain_M.tolist()[0],
-                       'heat':heat_M.tolist()[0]})
-    
-    results = sm.ols(formula="checkIn ~ date + rain + heat", data=df).fit()
+    if formulaIndex == 0:
+        df = pd.DataFrame({'checkIn':facebook_M.tolist()[0],
+                           'rain':rain_M.tolist()[0],
+                           'heat':heat_M.tolist()[0],
+                           'date':date_M.tolist()[0]})
+    else:
+        df = pd.DataFrame({'CdD':cdd_M.tolist()[0],
+                           'rain':rain_M.tolist()[0],
+                           'heat':heat_M.tolist()[0]})
+    results = sm.ols(formula=myFormula[formulaIndex], data=df).fit()
+    return results 
 
-    print POIName.encode("utf8")
-    print results.summary()
-    coef = results.params
-    with open("OLS_Regression.txt","a") as f:
-        f.write("{}\nR-squared:{:f}\ncheckIn() = [{:f} {:f} {:f} {:f}] [1 date() rain() heat()]^T\n"
-                .format(POIName.encode("utf8"),results.rsquared,coef[0],coef[1],coef[2],coef[3])) 
-
-def main():
-    fileNames = ["Facebook_0616.csv","Rain_0616.csv","Heat_0616.csv"]
-    float_data = getSortedFloatList(fileNames)
-
-    for POIIndex in range(len(POI)):
-        printSummary(POI[POIIndex],float_data,POIIndex)
+def printResults(OLSResults,fileName):
+    with open(fileName,"w") as f:
+        for index,results in enumerate(OLSResults):
+            print POI[index].encode("utf8")
+            print results.summary()
+            coef = results.params
+            if fileName[4] == 'A':
+                f.write("{}\nR-squared:{:f}\ncheckIn() = [{:f} {:f} {:f} {:f}] [1 rain() heat() date()]^T\n"
+                        .format(POI[index].encode("utf8"),results.rsquared,coef[0],coef[1],coef[2],coef[3]))
+            else:
+                f.write("{}\nR-squared:{:f}\ncheckIn() = [{:f} {:f} {:f}] [1 rain() heat()]^T\n"
+                        .format(POI[index].encode("utf8"),results.rsquared,coef[0],coef[1],coef[2]))
 
 if __name__ == '__main__':
     main()
