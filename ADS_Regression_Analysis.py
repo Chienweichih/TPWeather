@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 POI = (u'順益台灣原住民博物館',u'National Palace Museum',u'Chunghwa Postal Museum',
-       u'National Museum of History',u'Shilin Night Market',u'國立國父紀念館National Dr.Sun Yat-sen Memorial Hall',
-       u'Taipei Fine Arts Museum',u'Hsing Tian Kong',u'象山',
-       u'中正紀念堂 Chiang Kai-shek Memorial Hall',u'National Taiwan Museum',u'國軍歷史文物館',
-       u'Taipei 101 Observatory',u'Mengjia Longshan Temple',u'台北木柵動物園',
+       u'National Museum of History',u'國立國父紀念館National Dr.Sun Yat-sen Memorial Hall',
+       u'Taipei Fine Arts Museum',u'中正紀念堂 Chiang Kai-shek Memorial Hall',
+       u'National Taiwan Museum',u'國軍歷史文物館',u'Taipei 101 Observatory',u'袖珍博物館',
+       u'Mengjia Longshan Temple',u'Museum of Drinking Water',u'陽明山竹子湖海芋田',
        u'貓空邀月',u'北投溫泉博物館 Beitou Hot Spring Museum',u'Tianmu Baseball Stadium',
-       u'陽明山竹子湖海芋田',u'袖珍博物館',u'Museum of Drinking Water')
+       u'台北木柵動物園',u'象山',u'Shilin Night Market',u'Hsing Tian Kong')
 
 ######  S  M  T  W  T  F  S
 ######                15 16
@@ -77,9 +77,17 @@ date = [# all same
         2.0,1.0,1.0,1.0,1.0,1.0,
         2.0,1.0,1.0,1.0,1.0,1.0,1.0,
         2.0,1.0,1.0,1.0,1.0,1.0,1.0,
-        2.0,1.0]]
+        2.0,1.0],
+        # special
+        [1.67,5.13,
+        4.31,2.11,2.02,2.34,2.31,1.67,5.13,
+        4.31,2.11,2.02,2.34,2.31,5.13,
+        4.31,2.11,2.02,2.34,2.31,1.67,5.13,
+        4.31,2.11,2.02,2.34,2.31,1.67,5.13,
+        4.31,2.11]]
 date_name = ['all_same','weekday_weekend',
-             'monday','tuesday','wednesday','thursday','friday','saturday','sunday']
+             'monday','tuesday','wednesday','thursday',
+             'friday','saturday','sunday','special']
 
 def main():
     fileNames = ["Facebook_0616.csv","Rain_0616.csv","Heat_0616.csv"]
@@ -87,11 +95,20 @@ def main():
     
     ADDMUL = ["ADD","MUL"]
     for formulaIndex in range(2):
-        for i,date_date in enumerate(date):
+        for i,date_data in enumerate(date):
             results = []
             for POIIndex in range(len(POI)):
-                results.append(OLSResults(float_data,POIIndex,date_date,formulaIndex))
+                results.append(OLSResults(float_data,POIIndex,date_data,formulaIndex))
             printResults(results,"OLS/" + ADDMUL[formulaIndex] + "/OLS_Regression_" + date_name[i] + ".txt")
+            
+            print "[ " + date_name[i] + " " + ADDMUL[formulaIndex] + " ]"
+            sum = 0.0
+            for index,data in enumerate(results):
+                import math
+                if not math.isnan(data.rsquared):
+                    print "{:.10f}".format(data.rsquared) + "\t" + POI[index]
+                    sum += data.rsquared
+            print "{:.10f}".format(sum) + "\t" + "SUM"
 
 def getSortedFloatList(fileNames):
     import csv
@@ -132,9 +149,7 @@ def OLSResults(data,index,date_data,formulaIndex):
     heat_M = normalizedMatrix(data[2][index])
     date_M = normalizedMatrix(date_data)
     cdd_M = np.dot(facebook_M,inv(np.diag(date_M[0])))
-    
-    print cdd_M
-    
+
     '''
     test = np.array([[1., 2.], [3., 4.]])
     test = np.arange(1,5).reshape((2, 2))
@@ -155,8 +170,6 @@ def OLSResults(data,index,date_data,formulaIndex):
 def printResults(OLSResults,fileName):
     with open(fileName,"w") as f:
         for index,results in enumerate(OLSResults):
-            print POI[index].encode("utf8")
-            print results.summary()
             coef = results.params
             if fileName[4] == 'A':
                 f.write("{}\nR-squared:{:f}\ncheckIn() = [{:f} {:f} {:f} {:f}] [1 rain() heat() date()]^T\n"
