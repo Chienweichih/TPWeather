@@ -1,0 +1,7 @@
+![page 1](https://raw.githubusercontent.com/Chienweichih/BioInfo_Project/master/report image/TPWeather1.png) 
+![page 2](https://raw.githubusercontent.com/Chienweichih/BioInfo_Project/master/report image/TPWeather2.png) 
+![page 3](https://raw.githubusercontent.com/Chienweichih/BioInfo_Project/master/report image/TPWeather3.png) 
+![page 4](https://raw.githubusercontent.com/Chienweichih/BioInfo_Project/master/report image/TPWeather4.png) 
+![page 5](https://raw.githubusercontent.com/Chienweichih/BioInfo_Project/master/report image/TPWeather5.png) 
+![page 6](https://raw.githubusercontent.com/Chienweichih/BioInfo_Project/master/report image/TPWeather6.png) 
+![page 7](https://raw.githubusercontent.com/Chienweichih/BioInfo_Project/master/report image/TPWeather7.png) 
